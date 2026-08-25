@@ -1,0 +1,10 @@
+{
+  "name": "Remix ПВЗ Учёт — ИП Пузанова Т.Ю.",
+  "description": "Автоматизированная система поштучного складского учёта, прямого и обратного потока товаров WB, термопечати этикеток и биллинга для ИП Пузанова Т.Ю.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
