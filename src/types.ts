@@ -127,41 +127,33 @@ export interface WeightTierPrices {
   over_10kg: number;  // более 10 кг
 }
 
-export interface DirectFlowTariffs {
-  intakeAndAccounting: WeightTierPrices;   // Приемка и учет товара (10, 10, 10, 10)
-  branding: WeightTierPrices;              // Брендирование товара (10, 10, 15, 20)
-  packagingAndPlacement: WeightTierPrices; // Упаковка и размещение (20, 30, 35, 45)
-  assemblyAndStickering: WeightTierPrices; // Сборка и стикерование (10, 15, 25, 30)
+// ==========================================
+// ВЫПЛАТЫ ПЕРСОНАЛУ (МОТИВАЦИЯ)
+// ==========================================
+
+export interface DirectFlowStaffPayouts {
+  intake: WeightTierPrices;   // Приемка и учет товара (1, 2, 3, 2)
+  branding: WeightTierPrices; // Брендирование товара (3, 5, 10, 10)
+  packaging: WeightTierPrices;// Упаковка и размещение (8, 16, 21, 25)
+  assembly: WeightTierPrices; // Сборка и стикерование (1, 2, 3, 3)
 }
 
-export interface ReturnFlowTariffs {
-  intakeAndInspection: WeightTierPrices;   // Приемка, осмотр (10, 10, 10, 10)
-  verification: WeightTierPrices;          // Проверка (10, 15, 20, 25)
-  restoration: WeightTierPrices;           // Восстановление (30, 30, 35, 45)
-  packagingAndStickering: WeightTierPrices;// Упаковка и стикерование (15, 15, 25, 30)
+export interface ReverseFlowStaffPayouts {
+  intake: WeightTierPrices;       // Приемка, осмотр (1, 2, 3, 2)
+  verification: WeightTierPrices; // Проверка (5, 8, 13, 15)
+  restoration: WeightTierPrices;  // Восстановление (15, 15, 18, 20)
+  packaging: WeightTierPrices;    // Упаковка и стикерование (9, 11, 13, 15)
 }
 
 export interface TariffRates {
-  // Прямой поток по весовым категориям
-  directFlow: DirectFlowTariffs;
-  // Обратный поток по весовым категориям
-  returnFlow: ReturnFlowTariffs;
+  // Мотивация персонала (прямой поток)
+  directFlow: DirectFlowStaffPayouts;
+  // Мотивация персонала (обратный поток)
+  returnFlow: ReverseFlowStaffPayouts;
+  
   // Хранение
   storageFreeDays: number;  // Бесплатных дней хранения (5 дней)
   storagePerDay: number;    // Хранение за сутки после бесплатных (10 руб/сут)
-
-  // Опциональные поля для обратной совместимости
-  intake?: number;
-  registration?: number;
-  branding?: number;
-  packaging?: number;
-  placement?: number;
-  assembly?: number;
-  shipping?: number;
-  returnIntake?: number;
-  returnSorting?: number;
-  returnRepair?: number;
-  returnToSeller?: number;
 }
 
 export interface InvoiceRecord {
