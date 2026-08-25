@@ -120,52 +120,52 @@ export const TariffSettings: React.FC<TariffSettingsProps> = ({
     }));
   };
 
-  // Calculates direct totals per tier
+  // Calculates direct totals per tier (MOTIVATION)
   const directTotals: Record<WeightCategory, number> = {
     up_to_1kg:
-      (formData.directFlow?.intakeAndAccounting?.up_to_1kg || 0) +
+      (formData.directFlow?.intake?.up_to_1kg || 0) +
       (formData.directFlow?.branding?.up_to_1kg || 0) +
-      (formData.directFlow?.packagingAndPlacement?.up_to_1kg || 0) +
-      (formData.directFlow?.assemblyAndStickering?.up_to_1kg || 0),
+      (formData.directFlow?.packaging?.up_to_1kg || 0) +
+      (formData.directFlow?.assembly?.up_to_1kg || 0),
     '1_to_5kg':
-      (formData.directFlow?.intakeAndAccounting?.['1_to_5kg'] || 0) +
+      (formData.directFlow?.intake?.['1_to_5kg'] || 0) +
       (formData.directFlow?.branding?.['1_to_5kg'] || 0) +
-      (formData.directFlow?.packagingAndPlacement?.['1_to_5kg'] || 0) +
-      (formData.directFlow?.assemblyAndStickering?.['1_to_5kg'] || 0),
+      (formData.directFlow?.packaging?.['1_to_5kg'] || 0) +
+      (formData.directFlow?.assembly?.['1_to_5kg'] || 0),
     '5_to_10kg':
-      (formData.directFlow?.intakeAndAccounting?.['5_to_10kg'] || 0) +
+      (formData.directFlow?.intake?.['5_to_10kg'] || 0) +
       (formData.directFlow?.branding?.['5_to_10kg'] || 0) +
-      (formData.directFlow?.packagingAndPlacement?.['5_to_10kg'] || 0) +
-      (formData.directFlow?.assemblyAndStickering?.['5_to_10kg'] || 0),
+      (formData.directFlow?.packaging?.['5_to_10kg'] || 0) +
+      (formData.directFlow?.assembly?.['5_to_10kg'] || 0),
     over_10kg:
-      (formData.directFlow?.intakeAndAccounting?.over_10kg || 0) +
+      (formData.directFlow?.intake?.over_10kg || 0) +
       (formData.directFlow?.branding?.over_10kg || 0) +
-      (formData.directFlow?.packagingAndPlacement?.over_10kg || 0) +
-      (formData.directFlow?.assemblyAndStickering?.over_10kg || 0),
+      (formData.directFlow?.packaging?.over_10kg || 0) +
+      (formData.directFlow?.assembly?.over_10kg || 0),
   };
 
-  // Calculates return totals per tier
+  // Calculates return totals per tier (MOTIVATION)
   const returnTotals: Record<WeightCategory, number> = {
     up_to_1kg:
-      (formData.returnFlow?.intakeAndInspection?.up_to_1kg || 0) +
+      (formData.returnFlow?.intake?.up_to_1kg || 0) +
       (formData.returnFlow?.verification?.up_to_1kg || 0) +
       (formData.returnFlow?.restoration?.up_to_1kg || 0) +
-      (formData.returnFlow?.packagingAndStickering?.up_to_1kg || 0),
+      (formData.returnFlow?.packaging?.up_to_1kg || 0),
     '1_to_5kg':
-      (formData.returnFlow?.intakeAndInspection?.['1_to_5kg'] || 0) +
+      (formData.returnFlow?.intake?.['1_to_5kg'] || 0) +
       (formData.returnFlow?.verification?.['1_to_5kg'] || 0) +
       (formData.returnFlow?.restoration?.['1_to_5kg'] || 0) +
-      (formData.returnFlow?.packagingAndStickering?.['1_to_5kg'] || 0),
+      (formData.returnFlow?.packaging?.['1_to_5kg'] || 0),
     '5_to_10kg':
-      (formData.returnFlow?.intakeAndInspection?.['5_to_10kg'] || 0) +
+      (formData.returnFlow?.intake?.['5_to_10kg'] || 0) +
       (formData.returnFlow?.verification?.['5_to_10kg'] || 0) +
       (formData.returnFlow?.restoration?.['5_to_10kg'] || 0) +
-      (formData.returnFlow?.packagingAndStickering?.['5_to_10kg'] || 0),
+      (formData.returnFlow?.packaging?.['5_to_10kg'] || 0),
     over_10kg:
-      (formData.returnFlow?.intakeAndInspection?.over_10kg || 0) +
+      (formData.returnFlow?.intake?.over_10kg || 0) +
       (formData.returnFlow?.verification?.over_10kg || 0) +
       (formData.returnFlow?.restoration?.over_10kg || 0) +
-      (formData.returnFlow?.packagingAndStickering?.over_10kg || 0),
+      (formData.returnFlow?.packaging?.over_10kg || 0),
   };
 
   return (
@@ -176,7 +176,7 @@ export const TariffSettings: React.FC<TariffSettingsProps> = ({
           <div className="flex items-center gap-2">
             <Lock className="w-4 h-4 text-amber-700 shrink-0" />
             <span className="font-bold uppercase">
-              Режим только для чтения: Изменение тарифов и редактирование селлеров доступно Администратору (ИП Пузанова Т.Ю.)
+              Режим только для чтения: Изменение мотивации и редактирование селлеров доступно Администратору
             </span>
           </div>
           <span className="text-[10px] bg-amber-700 text-white px-2 py-0.5 font-black uppercase">
@@ -185,19 +185,19 @@ export const TariffSettings: React.FC<TariffSettingsProps> = ({
         </div>
       )}
 
-      {/* Tariffs Form */}
+      {/* Motivation Form */}
       <form onSubmit={handleSaveTariffs} className="bg-white p-6 border-2 border-black space-y-6 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b-2 border-black">
           <div className="flex items-center gap-2.5">
             <div className="p-2 bg-[#6B0F3B] text-[#C5A059] border border-black">
-              <DollarSign className="w-5 h-5" />
+              <Users className="w-5 h-5" />
             </div>
             <div>
               <h3 className="font-black text-black text-base uppercase tracking-tight">
-                Прейскурант тарифов: {BRAND_CONFIG.legalName}
+                Таблица мотивации сотрудников
               </h3>
               <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">
-                Дифференцированные ставки по весовым категориям (до 1 кг, 1–5 кг, 5–10 кг, &gt;10 кг)
+                Ставки выплат операторам ПВЗ за выполнение операций по весовым категориям
               </p>
             </div>
           </div>
@@ -215,23 +215,23 @@ export const TariffSettings: React.FC<TariffSettingsProps> = ({
               ) : (
                 <>
                   <Save className="w-4 h-4 text-[#C5A059]" />
-                  <span>Сохранить тарифы</span>
+                  <span>Сохранить мотивацию</span>
                 </>
               )}
             </button>
           ) : (
             <span className="text-[10px] font-black uppercase px-3 py-1.5 bg-gray-200 text-gray-700 border border-gray-400">
-              Тарифы утверждены
+              Ставки утверждены
             </span>
           )}
         </div>
 
-        {/* 1. ПРЯМОЙ ПОТОК */}
+        {/* 1. ПРЯМОЙ ПОТОК (МОТИВАЦИЯ) */}
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 bg-[#6B0F3B]"></span>
             <h4 className="text-xs font-black uppercase tracking-wider text-black">
-              1. Тарифы прямого потока (Штучная обработка товара под маркетплейс)
+              1. Выплаты персоналу: Прямой поток
             </h4>
           </div>
 
@@ -253,9 +253,6 @@ export const TariffSettings: React.FC<TariffSettingsProps> = ({
                 <tr className="hover:bg-neutral-50">
                   <td className="p-3 border-r-2 border-black">
                     <div className="font-black text-black uppercase">1. Приемка и учет товара</div>
-                    <div className="text-[11px] text-gray-500 font-normal">
-                      Штучная приемка, нанесение инвентарного ШК, занесение в базу
-                    </div>
                   </td>
                   {WEIGHT_COLS.map((col) => (
                     <td key={col.key} className="p-2 border-r-2 border-black text-center bg-gray-50/50">
@@ -264,8 +261,8 @@ export const TariffSettings: React.FC<TariffSettingsProps> = ({
                           type="number"
                           min="0"
                           disabled={!isAdmin}
-                          value={formData.directFlow?.intakeAndAccounting?.[col.key] ?? 10}
-                          onChange={(e) => updateDirect('intakeAndAccounting', col.key, parseFloat(e.target.value) || 0)}
+                          value={formData.directFlow?.intake?.[col.key] ?? 1}
+                          onChange={(e) => updateDirect('intake', col.key, parseFloat(e.target.value) || 0)}
                           className="w-20 p-1.5 bg-white border-2 border-black text-center font-mono font-black text-black text-xs disabled:bg-gray-100"
                         />
                         <span className="text-xs font-black text-gray-600">₽</span>
@@ -278,9 +275,6 @@ export const TariffSettings: React.FC<TariffSettingsProps> = ({
                 <tr className="hover:bg-neutral-50">
                   <td className="p-3 border-r-2 border-black">
                     <div className="font-black text-black uppercase">2. Брендирование товара</div>
-                    <div className="text-[11px] text-gray-500 font-normal">
-                      Наклейка фирменных ярлыков селлера, бирок, брендовой атрибутики
-                    </div>
                   </td>
                   {WEIGHT_COLS.map((col) => (
                     <td key={col.key} className="p-2 border-r-2 border-black text-center bg-gray-50/50">
@@ -289,7 +283,7 @@ export const TariffSettings: React.FC<TariffSettingsProps> = ({
                           type="number"
                           min="0"
                           disabled={!isAdmin}
-                          value={formData.directFlow?.branding?.[col.key] ?? 10}
+                          value={formData.directFlow?.branding?.[col.key] ?? 3}
                           onChange={(e) => updateDirect('branding', col.key, parseFloat(e.target.value) || 0)}
                           className="w-20 p-1.5 bg-white border-2 border-black text-center font-mono font-black text-black text-xs disabled:bg-gray-100"
                         />
@@ -303,9 +297,6 @@ export const TariffSettings: React.FC<TariffSettingsProps> = ({
                 <tr className="hover:bg-neutral-50">
                   <td className="p-3 border-r-2 border-black">
                     <div className="font-black text-black uppercase">3. Упаковка и размещение</div>
-                    <div className="text-[11px] text-gray-500 font-normal">
-                      Упаковка по регламенту WB, перемещение на адресную полку хранения
-                    </div>
                   </td>
                   {WEIGHT_COLS.map((col) => (
                     <td key={col.key} className="p-2 border-r-2 border-black text-center bg-gray-50/50">
@@ -314,8 +305,8 @@ export const TariffSettings: React.FC<TariffSettingsProps> = ({
                           type="number"
                           min="0"
                           disabled={!isAdmin}
-                          value={formData.directFlow?.packagingAndPlacement?.[col.key] ?? 20}
-                          onChange={(e) => updateDirect('packagingAndPlacement', col.key, parseFloat(e.target.value) || 0)}
+                          value={formData.directFlow?.packaging?.[col.key] ?? 8}
+                          onChange={(e) => updateDirect('packaging', col.key, parseFloat(e.target.value) || 0)}
                           className="w-20 p-1.5 bg-white border-2 border-black text-center font-mono font-black text-black text-xs disabled:bg-gray-100"
                         />
                         <span className="text-xs font-black text-gray-600">₽</span>
@@ -328,9 +319,6 @@ export const TariffSettings: React.FC<TariffSettingsProps> = ({
                 <tr className="hover:bg-neutral-50">
                   <td className="p-3 border-r-2 border-black">
                     <div className="font-black text-black uppercase">4. Сборка и стикерование</div>
-                    <div className="text-[11px] text-gray-500 font-normal">
-                      Снятие с полки под заказ WB, печать стикера маркетплейса, передача курьеру
-                    </div>
                   </td>
                   {WEIGHT_COLS.map((col) => (
                     <td key={col.key} className="p-2 border-r-2 border-black text-center bg-gray-50/50">
@@ -339,8 +327,8 @@ export const TariffSettings: React.FC<TariffSettingsProps> = ({
                           type="number"
                           min="0"
                           disabled={!isAdmin}
-                          value={formData.directFlow?.assemblyAndStickering?.[col.key] ?? 10}
-                          onChange={(e) => updateDirect('assemblyAndStickering', col.key, parseFloat(e.target.value) || 0)}
+                          value={formData.directFlow?.assembly?.[col.key] ?? 1}
+                          onChange={(e) => updateDirect('assembly', col.key, parseFloat(e.target.value) || 0)}
                           className="w-20 p-1.5 bg-white border-2 border-black text-center font-mono font-black text-black text-xs disabled:bg-gray-100"
                         />
                         <span className="text-xs font-black text-gray-600">₽</span>
@@ -352,7 +340,7 @@ export const TariffSettings: React.FC<TariffSettingsProps> = ({
                 {/* ИТОГО ПРЯМОЙ ПОТОК */}
                 <tr className="bg-[#FAF2E6] text-black font-black">
                   <td className="p-3 border-r-2 border-black uppercase text-xs tracking-wider">
-                    ИТОГО за полный цикл прямого потока:
+                    ИТОГО затраты на персонал (прямой поток):
                   </td>
                   {WEIGHT_COLS.map((col) => (
                     <td key={col.key} className="p-3 border-r-2 border-black text-center font-mono text-sm">
@@ -365,12 +353,12 @@ export const TariffSettings: React.FC<TariffSettingsProps> = ({
           </div>
         </div>
 
-        {/* 2. ОБРАТНЫЙ ПОТОК */}
+        {/* 2. ОБРАТНЫЙ ПОТОК (МОТИВАЦИЯ) */}
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 bg-red-600"></span>
             <h4 className="text-xs font-black uppercase tracking-wider text-black">
-              2. Тарифы обратного потока (Обработка клиентских возвратов с маркетплейса)
+              2. Выплаты персоналу: Обратный поток (Возвраты)
             </h4>
           </div>
 
@@ -392,9 +380,6 @@ export const TariffSettings: React.FC<TariffSettingsProps> = ({
                 <tr className="hover:bg-red-50/50">
                   <td className="p-3 border-r-2 border-black">
                     <div className="font-black text-black uppercase">1. Приемка, осмотр</div>
-                    <div className="text-[11px] text-gray-500 font-normal">
-                      Приемка возвращенного товара, первичный визуальный осмотр упаковки
-                    </div>
                   </td>
                   {WEIGHT_COLS.map((col) => (
                     <td key={col.key} className="p-2 border-r-2 border-black text-center bg-gray-50/50">
@@ -403,8 +388,8 @@ export const TariffSettings: React.FC<TariffSettingsProps> = ({
                           type="number"
                           min="0"
                           disabled={!isAdmin}
-                          value={formData.returnFlow?.intakeAndInspection?.[col.key] ?? 10}
-                          onChange={(e) => updateReturn('intakeAndInspection', col.key, parseFloat(e.target.value) || 0)}
+                          value={formData.returnFlow?.intake?.[col.key] ?? 1}
+                          onChange={(e) => updateReturn('intake', col.key, parseFloat(e.target.value) || 0)}
                           className="w-20 p-1.5 bg-white border-2 border-black text-center font-mono font-black text-black text-xs disabled:bg-gray-100"
                         />
                         <span className="text-xs font-black text-gray-600">₽</span>
@@ -417,9 +402,6 @@ export const TariffSettings: React.FC<TariffSettingsProps> = ({
                 <tr className="hover:bg-red-50/50">
                   <td className="p-3 border-r-2 border-black">
                     <div className="font-black text-black uppercase">2. Проверка (Категоризация А / Б / В)</div>
-                    <div className="text-[11px] text-gray-500 font-normal">
-                      Детальная диагностика сохранности, комплектности и товарного вида
-                    </div>
                   </td>
                   {WEIGHT_COLS.map((col) => (
                     <td key={col.key} className="p-2 border-r-2 border-black text-center bg-gray-50/50">
@@ -428,7 +410,7 @@ export const TariffSettings: React.FC<TariffSettingsProps> = ({
                           type="number"
                           min="0"
                           disabled={!isAdmin}
-                          value={formData.returnFlow?.verification?.[col.key] ?? 10}
+                          value={formData.returnFlow?.verification?.[col.key] ?? 5}
                           onChange={(e) => updateReturn('verification', col.key, parseFloat(e.target.value) || 0)}
                           className="w-20 p-1.5 bg-white border-2 border-black text-center font-mono font-black text-black text-xs disabled:bg-gray-100"
                         />
@@ -442,9 +424,6 @@ export const TariffSettings: React.FC<TariffSettingsProps> = ({
                 <tr className="hover:bg-red-50/50">
                   <td className="p-3 border-r-2 border-black">
                     <div className="font-black text-black uppercase">3. Восстановление</div>
-                    <div className="text-[11px] text-gray-500 font-normal">
-                      Замена поврежденного элемента или комплектующего из запаса селлера
-                    </div>
                   </td>
                   {WEIGHT_COLS.map((col) => (
                     <td key={col.key} className="p-2 border-r-2 border-black text-center bg-gray-50/50">
@@ -453,7 +432,7 @@ export const TariffSettings: React.FC<TariffSettingsProps> = ({
                           type="number"
                           min="0"
                           disabled={!isAdmin}
-                          value={formData.returnFlow?.restoration?.[col.key] ?? 30}
+                          value={formData.returnFlow?.restoration?.[col.key] ?? 15}
                           onChange={(e) => updateReturn('restoration', col.key, parseFloat(e.target.value) || 0)}
                           className="w-20 p-1.5 bg-white border-2 border-black text-center font-mono font-black text-black text-xs disabled:bg-gray-100"
                         />
@@ -467,9 +446,6 @@ export const TariffSettings: React.FC<TariffSettingsProps> = ({
                 <tr className="hover:bg-red-50/50">
                   <td className="p-3 border-r-2 border-black">
                     <div className="font-black text-black uppercase">4. Упаковка и стикерование</div>
-                    <div className="text-[11px] text-gray-500 font-normal">
-                      Переупаковка в свежую тару, наклейка новых ШК, возврат на полку или селлеру
-                    </div>
                   </td>
                   {WEIGHT_COLS.map((col) => (
                     <td key={col.key} className="p-2 border-r-2 border-black text-center bg-gray-50/50">
@@ -478,8 +454,8 @@ export const TariffSettings: React.FC<TariffSettingsProps> = ({
                           type="number"
                           min="0"
                           disabled={!isAdmin}
-                          value={formData.returnFlow?.packagingAndStickering?.[col.key] ?? 15}
-                          onChange={(e) => updateReturn('packagingAndStickering', col.key, parseFloat(e.target.value) || 0)}
+                          value={formData.returnFlow?.packaging?.[col.key] ?? 9}
+                          onChange={(e) => updateReturn('packaging', col.key, parseFloat(e.target.value) || 0)}
                           className="w-20 p-1.5 bg-white border-2 border-black text-center font-mono font-black text-black text-xs disabled:bg-gray-100"
                         />
                         <span className="text-xs font-black text-gray-600">₽</span>
@@ -491,7 +467,7 @@ export const TariffSettings: React.FC<TariffSettingsProps> = ({
                 {/* ИТОГО ОБРАТНЫЙ ПОТОК */}
                 <tr className="bg-red-100 text-red-950 font-black">
                   <td className="p-3 border-r-2 border-black uppercase text-xs tracking-wider">
-                    ИТОГО за полный цикл обратного потока:
+                    ИТОГО затраты на персонал (обратный поток):
                   </td>
                   {WEIGHT_COLS.map((col) => (
                     <td key={col.key} className="p-3 border-r-2 border-black text-center font-mono text-sm">
@@ -535,7 +511,7 @@ export const TariffSettings: React.FC<TariffSettingsProps> = ({
 
             <div className="bg-white p-3 border-2 border-black">
               <label className="block text-[10px] font-black uppercase tracking-wider text-black mb-1">
-                Стоимость хранения сверх бесплатного периода (₽/сут. за единицу)
+                Стоимость хранения сверх бесплатного периода (₽/сут. за ячейку 40л)
               </label>
               <div className="flex items-center gap-2">
                 <input
@@ -549,7 +525,7 @@ export const TariffSettings: React.FC<TariffSettingsProps> = ({
                 <span className="text-xs font-black text-black shrink-0">₽/сутки</span>
               </div>
               <span className="text-[10px] text-gray-500 font-bold uppercase mt-1 block">
-                Начисляется ежедневно начиная с 6-го дня нахождения в хранении
+                Начисляется ежедневно начиная с 6-го дня (15 ₽ за ячейку 40л)
               </span>
             </div>
           </div>
@@ -568,7 +544,7 @@ export const TariffSettings: React.FC<TariffSettingsProps> = ({
                 Реестр селлеров (Заказчиков фулфилмента)
               </h3>
               <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">
-                Продавцы маркетплейсов на обслуживании ИП Пузанова Т.Ю.
+                Продавцы маркетплейсов на обслуживании
               </p>
             </div>
           </div>
@@ -598,7 +574,7 @@ export const TariffSettings: React.FC<TariffSettingsProps> = ({
                   required
                   value={newSellerName}
                   onChange={(e) => setNewSellerName(e.target.value)}
-                  placeholder="ИП Иванов И.И. (ShopName)"
+                  placeholder="ИП Иванов И.И."
                   className="w-full text-xs p-2 bg-white border-2 border-black font-bold uppercase"
                 />
               </div>
@@ -666,45 +642,48 @@ export const TariffSettings: React.FC<TariffSettingsProps> = ({
         )}
 
         <div className="divide-y-2 divide-black mt-4">
-          {sellers.map((s) => (
-            <div key={s.id} className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div>
-                <div className="font-black text-xs uppercase text-black flex items-center gap-2">
-                  <span>{s.name}</span>
-                  <span className="text-[9px] text-[#6B0F3B] bg-[#F4EBE0] px-1.5 py-0.2 font-mono font-black border border-[#C5A059]">
-                    {s.id}
-                  </span>
-                </div>
-                <div className="text-[11px] text-gray-600 font-bold uppercase flex flex-wrap gap-x-3 mt-0.5">
-                  <span>ИНН: {s.inn}</span>
-                  <span>
-                    Контакты: {s.contactPerson} ({s.phone})
-                  </span>
-                  <span>{s.email}</span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 self-start sm:self-auto">
-                <span className="text-[10px] text-black bg-[#DFC386] px-2 py-0.5 font-black uppercase border border-black">
-                  Активный договор
-                </span>
-
-                {isAdmin && (
-                  <button
-                    onClick={() => {
-                      if (confirm(`Удалить селлера ${s.name} из реестра?`)) {
-                        onDeleteSeller && onDeleteSeller(s.id);
-                      }
-                    }}
-                    className="p-1 text-red-600 hover:bg-red-100 border border-red-400 cursor-pointer"
-                    title="Удалить селлера (Администратор)"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                )}
-              </div>
+          {sellers.length === 0 ? (
+            <div className="py-6 text-center text-gray-500 font-bold uppercase text-xs">
+              Селлеры не добавлены. Нажмите "Добавить селлера" выше.
             </div>
-          ))}
+          ) : (
+            sellers.map((s) => (
+              <div key={s.id} className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <div className="font-black text-xs uppercase text-black flex items-center gap-2">
+                    <span>{s.name}</span>
+                  </div>
+                  <div className="text-[11px] text-gray-600 font-bold uppercase flex flex-wrap gap-x-3 mt-0.5">
+                    <span>ИНН: {s.inn}</span>
+                    <span>
+                      Контакты: {s.contactPerson} ({s.phone})
+                    </span>
+                    <span>{s.email}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 self-start sm:self-auto">
+                  <span className="text-[10px] text-black bg-[#DFC386] px-2 py-0.5 font-black uppercase border border-black">
+                    Активный договор
+                  </span>
+
+                  {isAdmin && (
+                    <button
+                      onClick={() => {
+                        if (confirm(`Удалить селлера ${s.name} из реестра?`)) {
+                          onDeleteSeller && onDeleteSeller(s.id);
+                        }
+                      }}
+                      className="p-1 text-red-600 hover:bg-red-100 border border-red-400 cursor-pointer"
+                      title="Удалить селлера (Администратор)"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
@@ -716,7 +695,7 @@ export const TariffSettings: React.FC<TariffSettingsProps> = ({
               Сброс к демонстрационным данным
             </h4>
             <p className="text-[11px] text-black font-bold uppercase">
-              Восстановить примеры товаров на всех этапах жизненного цикла с весовыми категориями под брендом ИП Пузанова Т.Ю.
+              Восстановить примеры товаров на всех этапах жизненного цикла.
             </p>
           </div>
           <button
