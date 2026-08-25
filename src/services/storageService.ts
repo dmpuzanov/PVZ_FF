@@ -200,9 +200,6 @@ export class StorageService {
     this.set(STORAGE_KEY_TARIFFS, tariffs);
   }
 
-  /**
-   * Получить стоимость конкретной операции в зависимости от веса товара
-   */
   static getOperationRate(
     state: ItemState,
     weightInKg?: number,
@@ -210,42 +207,22 @@ export class StorageService {
   ): number {
     const cat = getWeightCategory(weightInKg);
     switch (state) {
-      // 1. Прямой поток
-      case 'intake':
-        return tariffs.directFlow?.intake?.[cat] ?? 1;
-      case 'registration':
-        return 0; 
-      case 'branding':
-        return tariffs.directFlow?.branding?.[cat] ?? 3;
-      case 'packaging':
-        return tariffs.directFlow?.packaging?.[cat] ?? 8;
-      case 'placed':
-        return 0; 
-      case 'assembly':
-        return tariffs.directFlow?.assembly?.[cat] ?? 1;
-      case 'shipped':
-        return 0; 
-
-      // 2. Обратный поток
-      case 'return_intake':
-        return tariffs.returnFlow?.intake?.[cat] ?? 1;
-      case 'return_sorting':
-        return tariffs.returnFlow?.verification?.[cat] ?? 5;
-      case 'return_repair':
-        return tariffs.returnFlow?.restoration?.[cat] ?? 15;
-      case 'returned_seller':
-        return tariffs.returnFlow?.packaging?.[cat] ?? 9;
-
-      case 'storage':
-        return 0; 
-      default:
-        return 0;
+      case 'intake': return tariffs.directFlow?.intake?.[cat] ?? 1;
+      case 'registration': return 0; 
+      case 'branding': return tariffs.directFlow?.branding?.[cat] ?? 3;
+      case 'packaging': return tariffs.directFlow?.packaging?.[cat] ?? 8;
+      case 'placed': return 0; 
+      case 'assembly': return tariffs.directFlow?.assembly?.[cat] ?? 1;
+      case 'shipped': return 0; 
+      case 'return_intake': return tariffs.returnFlow?.intake?.[cat] ?? 1;
+      case 'return_sorting': return tariffs.returnFlow?.verification?.[cat] ?? 5;
+      case 'return_repair': return tariffs.returnFlow?.restoration?.[cat] ?? 15;
+      case 'returned_seller': return tariffs.returnFlow?.packaging?.[cat] ?? 9;
+      case 'storage': return 0; 
+      default: return 0;
     }
   }
 
-  /**
-   * Подсчёт суммарной мотивации прямого потока по всем 4 весовым категориям
-   */
   static getDirectFlowTotals(tariffs: TariffRates = this.getTariffs()): Record<WeightCategory, number> {
     const cats: WeightCategory[] = ['up_to_1kg', '1_to_5kg', '5_to_10kg', 'over_10kg'];
     const res = {} as Record<WeightCategory, number>;
@@ -259,9 +236,6 @@ export class StorageService {
     return res;
   }
 
-  /**
-   * Подсчёт суммарной мотивации обратного потока по всем 4 весовым категориям
-   */
   static getReturnFlowTotals(tariffs: TariffRates = this.getTariffs()): Record<WeightCategory, number> {
     const cats: WeightCategory[] = ['up_to_1kg', '1_to_5kg', '5_to_10kg', 'over_10kg'];
     const res = {} as Record<WeightCategory, number>;
@@ -361,9 +335,7 @@ export class StorageService {
       cost: intakeCost,
       operator,
       details: 'Товар принят в ПВЗ, присвоен инвентарный номер и штрих-код',
-      meta: {
-        weightCategory: 'up_to_1kg',
-      },
+      meta: { weightCategory: 'up_to_1kg' },
     };
 
     const newItem: InventoryItem = {
@@ -391,15 +363,23 @@ export class StorageService {
     return created;
   }
 
+  /**
+   * Расчет стоимости хранения по новому алгоритму:
+   * 1. Ячейка = 40 литров. Товары не делятся (целочисленное размещение).
+   * 2. Разные артикулы (SKU) хранятся в разных ячейках.
+   * 3. Первые 5 дней бесплатно.
+   * 4. Стоимость: 15 руб/день за ячейку.
+   */
   static calculateStorageFee(item: InventoryItem, tariffs = this.getTariffs()): {
     totalDays: number;
     freeDays: number;
     chargeableDays: number;
     storageCost: number;
     isCurrentlyInStorage: boolean;
+    cellsUsed: number;
   } {
-    if (!item.storageEnteredAt) {
-      return { totalDays: 0, freeDays: tariffs.storageFreeDays, chargeableDays: 0, storageCost: 0, isCurrentlyInStorage: false };
+    if (!item.storageEnteredAt || !item.dimensions?.volumeLiters) {
+      return { totalDays: 0, freeDays: tariffs.storageFreeDays, chargeableDays: 0, storageCost: 0, isCurrentlyInStorage: false, cellsUsed: 0 };
     }
 
     const startDate = new Date(item.storageEnteredAt).getTime();
@@ -408,7 +388,43 @@ export class StorageService {
     const totalDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
     const freeDays = tariffs.storageFreeDays;
     const chargeableDays = Math.max(0, totalDays - freeDays);
-    const storageCost = chargeableDays * tariffs.storagePerDay;
+
+    if (chargeableDays <= 0) {
+      return { 
+        totalDays, 
+        freeDays, 
+        chargeableDays: 0, 
+        storageCost: 0, 
+        isCurrentlyInStorage: item.currentState === 'storage' && !item.storageExitedAt, 
+        cellsUsed: 0 
+      };
+    }
+
+    // 1. Сколько целых штук этого товара влезает в одну ячейку (40 литров)
+    const volume = item.dimensions.volumeLiters;
+    const itemsPerCell = Math.max(1, Math.floor(40 / volume));
+    
+    // 2. Считаем, сколько товаров этого артикула сейчас находится на хранении
+    const allItems = this.getItems();
+    const skuKey = item.sellerSku || item.inventoryNumber; // Если артикула нет, используем инв. номер как уникальный
+    const skuItemsInStorage = allItems.filter(i => 
+      (i.sellerSku || i.inventoryNumber) === skuKey && 
+      i.currentState === 'storage'
+    ).length;
+
+    const safeSkuCount = Math.max(1, skuItemsInStorage); // Защита от деления на 0
+    
+    // 3. Сколько ячеек нужно для этого количества товаров
+    const cellsNeeded = Math.ceil(safeSkuCount / itemsPerCell);
+    
+    // 4. Общая стоимость хранения этого артикула в день
+    const totalSkuCostPerDay = cellsNeeded * tariffs.storagePerDay;
+    
+    // 5. Справедливая стоимость хранения для одной единицы этого товара в день
+    const costPerItemPerDay = totalSkuCostPerDay / safeSkuCount;
+    
+    // 6. Итоговая стоимость для этого товара за платный период
+    const storageCost = chargeableDays * costPerItemPerDay;
 
     return {
       totalDays,
@@ -416,6 +432,7 @@ export class StorageService {
       chargeableDays,
       storageCost,
       isCurrentlyInStorage: item.currentState === 'storage' && !item.storageExitedAt,
+      cellsUsed: cellsNeeded
     };
   }
 
@@ -430,12 +447,7 @@ export class StorageService {
       title?: string;
       sellerSku?: string;
       barcodeEan?: string;
-      dimensions?: {
-        length: number;
-        width: number;
-        height: number;
-        weight: number;
-      };
+      dimensions?: { length: number; width: number; height: number; weight: number };
       storageCell?: string;
       brandingRequired?: boolean;
       brandName?: string;
@@ -472,6 +484,7 @@ export class StorageService {
       weightKg: currentWeight,
     };
 
+    // Обработка выхода из хранения и начисление платы
     if (item.currentState === 'storage' && nextState !== 'storage' && !item.storageExitedAt) {
       item.storageExitedAt = now;
       const storageCalc = this.calculateStorageFee(item, tariffs);
@@ -485,7 +498,7 @@ export class StorageService {
           timestamp: now,
           cost: storageCalc.storageCost,
           operator: 'Система (Биллинг)',
-          details: `Хранение: ${storageCalc.totalDays} дн. (платных: ${storageCalc.chargeableDays} дн. по ${tariffs.storagePerDay} ₽/дн)`,
+          details: `Хранение: ${storageCalc.totalDays} дн. (платных: ${storageCalc.chargeableDays} дн.). Ячеек: ${storageCalc.cellsUsed}. Стоимость: ${storageCalc.storageCost.toFixed(2)} ₽`,
           meta: {
             storageDays: storageCalc.totalDays,
             chargeableDays: storageCalc.chargeableDays,
@@ -507,7 +520,6 @@ export class StorageService {
         if (payload.title) item.title = payload.title;
         if (payload.sellerSku) item.sellerSku = payload.sellerSku;
         if (payload.barcodeEan) item.barcodeEan = payload.barcodeEan;
-
         if (payload.dimensions) {
           const { length, width, height, weight } = payload.dimensions;
           const volumeLiters = parseFloat(((length * width * height) / 1000).toFixed(2));
@@ -532,7 +544,7 @@ export class StorageService {
         break;
       }
       case 'packaging': {
-        item.packagingType = payload.packagingType || item.packagingType || 'Стандартная упаковка (Пакет + воздушно-пузырчатая пленка)';
+        item.packagingType = payload.packagingType || item.packagingType || 'Стандартная упаковка';
         item.packagingCompletedAt = now;
         stateMeta.packagingType = item.packagingType;
         break;
@@ -652,7 +664,7 @@ export class StorageService {
             opsMap[log.state].totalCost += log.cost;
           }
           itemInPeriodCost += log.cost;
-          executedOps.push(`${log.stateName} (${log.cost} ₽)`);
+          executedOps.push(`${log.stateName} (${log.cost.toFixed(2)} ₽)`);
 
           if (log.state === 'storage' && log.meta?.chargeableDays) {
             totalStorageDays += log.meta.storageDays || 0;
