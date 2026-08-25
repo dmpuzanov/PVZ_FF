@@ -16,7 +16,7 @@ import {
 import { BrandLogo, BRAND_CONFIG } from './BrandLogo';
 import { Seller, UserRole, UserSession } from '../types';
 
-export type NavTab = 'operator' | 'kanban' | 'registry' | 'billing' | 'reports' | 'tariffs';
+export type NavTab = 'operator' | 'kanban' | 'registry' | 'billing' | 'reports' | 'settings';
 
 interface NavbarProps {
   activeTab: NavTab;
@@ -58,7 +58,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     setIsRoleDropdownOpen(false);
 
     // If switching to seller and on operator tab, redirect to registry
-    if (role === 'seller' && (activeTab === 'operator' || activeTab === 'tariffs')) {
+    if (role === 'seller' && (activeTab === 'operator' || activeTab === 'settings')) {
       onSelectTab('registry');
     }
   };
@@ -139,7 +139,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     <div>
                       <div className="text-xs font-black uppercase">Администратор (ИП Пузанова)</div>
                       <div className={`text-[10px] font-medium leading-tight mt-0.5 ${session.role === 'admin' ? 'text-neutral-200' : 'text-gray-600'}`}>
-                        Полный доступ: редактирование товаров, удаление записей, управление тарифами и селлерами
+                        Полный доступ: редактирование товаров, удаление записей, управление настройками и селлерами
                       </div>
                     </div>
                   </button>
@@ -206,7 +206,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Barcode Scanner Action */}
             <button
               onClick={onOpenScanner}
-              className="bg-white hover:bg-neutral-200 text-black font-black px-3.5 py-2 text-xs uppercase tracking-wider hidden lg:flex items-center gap-1.5 transition-colors cursor-pointer border-2 border-black"
+              className="bg-white hover:bg-neutral-200 text-black font-black px-3.5 py-2 text-xs uppercase tracking-wider hidden lg:flex items-center gap-1.5 transition-colors cursor-pointer border border-black"
               title="Сканировать или ввести инвентарный стикер"
             >
               <Scan className="w-4 h-4 text-[#6B0F3B]" />
@@ -288,17 +288,17 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span>Услуги и Аналитика</span>
           </button>
 
-          {/* Tariffs and Sellers Settings (Admin/Operator view, hidden or read-only for seller) */}
+          {/* Settings (Admin/Operator view, hidden or read-only for seller) */}
           <button
-            onClick={() => onSelectTab('tariffs')}
+            onClick={() => onSelectTab('settings')}
             className={`px-3 py-1.5 font-black uppercase tracking-wider transition-all whitespace-nowrap flex items-center gap-1.5 text-xs ${
-              activeTab === 'tariffs'
+              activeTab === 'settings'
                 ? 'bg-white text-black'
                 : 'text-neutral-400 hover:text-white hover:bg-neutral-900'
             }`}
           >
             <Settings className="w-3.5 h-3.5" />
-            <span>Тарифы и Селлеры</span>
+            <span>Настройки</span>
           </button>
         </nav>
       </div>
