@@ -125,8 +125,6 @@ export const STATE_CONFIG: Record<
     isTerminal: true,
     order: 8,
   },
-
-  // Обратный поток
   return_intake: {
     name: 'Возврат: Приёмка',
     shortName: 'ВОЗВРАТ: ПРИЁМ',
@@ -214,65 +212,65 @@ export class StorageService {
     switch (state) {
       // 1. Прямой поток
       case 'intake':
-        return tariffs.directFlow?.intakeAndAccounting?.[cat] ?? 10;
+        return tariffs.directFlow?.intake?.[cat] ?? 1;
       case 'registration':
-        return 0; // Входит в этап «Приемка и учет товара»
+        return 0; 
       case 'branding':
-        return tariffs.directFlow?.branding?.[cat] ?? 10;
+        return tariffs.directFlow?.branding?.[cat] ?? 3;
       case 'packaging':
-        return tariffs.directFlow?.packagingAndPlacement?.[cat] ?? 20;
+        return tariffs.directFlow?.packaging?.[cat] ?? 8;
       case 'placed':
-        return 0; // Входит в этап «Упаковка и размещение»
+        return 0; 
       case 'assembly':
-        return tariffs.directFlow?.assemblyAndStickering?.[cat] ?? 10;
+        return tariffs.directFlow?.assembly?.[cat] ?? 1;
       case 'shipped':
-        return 0; // Входит в этап «Сборка и стикерование» / отгрузка
+        return 0; 
 
       // 2. Обратный поток
       case 'return_intake':
-        return tariffs.returnFlow?.intakeAndInspection?.[cat] ?? 10;
+        return tariffs.returnFlow?.intake?.[cat] ?? 1;
       case 'return_sorting':
-        return tariffs.returnFlow?.verification?.[cat] ?? 10;
+        return tariffs.returnFlow?.verification?.[cat] ?? 5;
       case 'return_repair':
-        return tariffs.returnFlow?.restoration?.[cat] ?? 30;
+        return tariffs.returnFlow?.restoration?.[cat] ?? 15;
       case 'returned_seller':
-        return tariffs.returnFlow?.packagingAndStickering?.[cat] ?? 15;
+        return tariffs.returnFlow?.packaging?.[cat] ?? 9;
 
       case 'storage':
-        return 0; // Начисляется посуточно после 5 бесплатных дней
+        return 0; 
       default:
         return 0;
     }
   }
 
   /**
-   * Подсчёт суммарного тарифа прямого потока по всем 4 весовым категориям
+   * Подсчёт суммарной мотивации прямого потока по всем 4 весовым категориям
    */
   static getDirectFlowTotals(tariffs: TariffRates = this.getTariffs()): Record<WeightCategory, number> {
     const cats: WeightCategory[] = ['up_to_1kg', '1_to_5kg', '5_to_10kg', 'over_10kg'];
     const res = {} as Record<WeightCategory, number>;
     cats.forEach((cat) => {
       res[cat] =
-        (tariffs.directFlow?.intakeAndAccounting?.[cat] || 0) +
+        (tariffs.directFlow?.intake?.[cat] || 0) +
         (tariffs.directFlow?.branding?.[cat] || 0) +
-        (tariffs.directFlow?.packagingAndPlacement?.[cat] || 0) +
-        (tariffs.directFlow?.assemblyAndStickering?.[cat] || 0);
+        (tariffs.directFlow?.packaging?.[cat] || 0) +
+        (tariffs.directFlow?.assembly?.[cat] || 0);
     });
     return res;
   }
 
   /**
-   * Подсчёт суммарного тарифа обратного потока по всем 4 весовым категориям
+   * Подсчёт суммарной мотивации обратного потока по всем 4 весовым категориям
    */
   static getReturnFlowTotals(tariffs: TariffRates = this.getTariffs()): Record<WeightCategory, number> {
     const cats: WeightCategory[] = ['up_to_1kg', '1_to_5kg', '5_to_10kg', 'over_10kg'];
     const res = {} as Record<WeightCategory, number>;
     cats.forEach((cat) => {
       res[cat] =
-        (tariffs.returnFlow?.intakeAndInspection?.[cat] || 0) +
+        (tariffs.returnFlow?.intake?.[cat] || 0) +
         (tariffs.returnFlow?.verification?.[cat] || 0) +
         (tariffs.returnFlow?.restoration?.[cat] || 0) +
-        (tariffs.returnFlow?.packagingAndStickering?.[cat] || 0);
+        (tariffs.returnFlow?.packaging?.[cat] || 0);
     });
     return res;
   }
@@ -346,9 +344,6 @@ export class StorageService {
     return `${prefix}${String(next).padStart(5, '0')}`;
   }
 
-  /**
-   * 1. Приёмка — товар заносится в ПВЗ и получает стикер
-   */
   static createIntakeItem(operator = 'Оператор ПВЗ', customSticker?: string): InventoryItem {
     const tariffs = this.getTariffs();
     const inventoryNumber = customSticker?.trim() || this.generateNextInventoryNumber();
@@ -387,9 +382,6 @@ export class StorageService {
     return newItem;
   }
 
-  /**
-   * Быстрая массовая приёмка
-   */
   static createBulkIntake(count: number, operator = 'Оператор ПВЗ'): InventoryItem[] {
     const created: InventoryItem[] = [];
     for (let i = 0; i < count; i++) {
@@ -399,9 +391,6 @@ export class StorageService {
     return created;
   }
 
-  /**
-   * Расчёт стоимости хранения для единицы товара
-   */
   static calculateStorageFee(item: InventoryItem, tariffs = this.getTariffs()): {
     totalDays: number;
     freeDays: number;
@@ -430,9 +419,6 @@ export class StorageService {
     };
   }
 
-  /**
-   * Переход состояния (State Machine) с учётом весовой категории
-   */
   static advanceItemState(
     itemId: string,
     nextState: ItemState,
@@ -477,7 +463,6 @@ export class StorageService {
     const now = new Date().toISOString();
     const operator = payload.operator || 'Оператор ПВЗ';
 
-    // Определение веса и категории товара
     const currentWeight = payload.dimensions?.weight ?? item.dimensions?.weight;
     const weightCat = getWeightCategory(currentWeight);
     const weightCatLabel = WEIGHT_CATEGORY_LABELS[weightCat];
@@ -487,12 +472,10 @@ export class StorageService {
       weightKg: currentWeight,
     };
 
-    // 1. Обработка выхода из хранения, если товар покидает хранение
     if (item.currentState === 'storage' && nextState !== 'storage' && !item.storageExitedAt) {
       item.storageExitedAt = now;
       const storageCalc = this.calculateStorageFee(item, tariffs);
       if (storageCalc.storageCost > 0) {
-        // Добавляем запись о начислении за хранение
         const storageLog: OperationLog = {
           id: `log-${Date.now()}-storage`,
           itemId: item.id,
@@ -515,10 +498,8 @@ export class StorageService {
       }
     }
 
-    // 2. Расчет стоимости операции по тарифной сетке с учетом весовой категории
     const operationCost = this.getOperationRate(nextState, currentWeight, tariffs);
 
-    // 3. Обновление полей сущности для целевого состояния
     switch (nextState) {
       case 'registration': {
         if (payload.sellerId) item.sellerId = payload.sellerId;
@@ -536,7 +517,6 @@ export class StorageService {
         }
         break;
       }
-
       case 'storage': {
         item.storageCell = payload.storageCell || item.storageCell || 'A-01-01';
         item.storageEnteredAt = now;
@@ -544,7 +524,6 @@ export class StorageService {
         stateMeta.cell = item.storageCell;
         break;
       }
-
       case 'branding': {
         item.brandingRequired = true;
         item.brandName = payload.brandName || item.brandName || 'Фирменный бренд';
@@ -552,21 +531,18 @@ export class StorageService {
         stateMeta.brandName = item.brandName;
         break;
       }
-
       case 'packaging': {
         item.packagingType = payload.packagingType || item.packagingType || 'Стандартная упаковка (Пакет + воздушно-пузырчатая пленка)';
         item.packagingCompletedAt = now;
         stateMeta.packagingType = item.packagingType;
         break;
       }
-
       case 'placed': {
         item.placementCell = payload.placementCell || item.placementCell || 'READY-01';
         item.placedAt = now;
         stateMeta.cell = item.placementCell;
         break;
       }
-
       case 'assembly': {
         item.orderNumber = payload.orderNumber || item.orderNumber || `WB-${Math.floor(10000000 + Math.random() * 90000000)}`;
         item.wbBarcode = payload.wbBarcode || item.barcodeEan || item.sellerSku || 'WB-BC-DEFAULT';
@@ -577,7 +553,6 @@ export class StorageService {
         stateMeta.wbMpSticker = item.wbMpSticker;
         break;
       }
-
       case 'shipped': {
         item.shipmentNumber = payload.shipmentNumber || `ACT-WB-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.floor(10 + Math.random() * 90)}`;
         item.shippedAt = now;
@@ -585,7 +560,6 @@ export class StorageService {
         stateMeta.wbMpSticker = item.wbMpSticker;
         break;
       }
-
       case 'return_intake': {
         item.returnEnteredAt = now;
         item.returnReason = payload.returnReason || 'Отказ покупателя при вручении в ПВЗ';
@@ -594,20 +568,17 @@ export class StorageService {
         stateMeta.returnNumber = item.returnNumber;
         break;
       }
-
       case 'return_sorting': {
         item.returnCategory = payload.returnCategory || 'A';
         item.returnSortingNotes = payload.returnSortingNotes || payload.details || '';
         stateMeta.returnCategory = item.returnCategory;
         break;
       }
-
       case 'return_repair': {
         item.returnRepairedAt = now;
         stateMeta.repairNotes = payload.repairNotes || 'Замена детали из запаса селлера произведена';
         break;
       }
-
       case 'returned_seller': {
         item.returnedToSellerAt = now;
         break;
@@ -638,9 +609,6 @@ export class StorageService {
     return item;
   }
 
-  /**
-   * Сгенерировать счёт/акт селлеру за период
-   */
   static generateInvoice(sellerId: string, periodStart: string, periodEnd: string): InvoiceRecord {
     const sellers = this.getSellers();
     const seller = sellers.find((s) => s.id === sellerId);
@@ -783,7 +751,6 @@ export class StorageService {
 
     item.updatedAt = now;
 
-    // Log admin modification
     const log: OperationLog = {
       id: `log-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
       itemId: item.id,
